@@ -12,4 +12,4 @@ RUN npm install --production --legacy-peer-deps
 COPY --from=builder /app/dist ./dist
 RUN mkdir -p uploads/drivers uploads/vehicles uploads/rentals
 EXPOSE 3001
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
