@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -102,5 +103,11 @@ export class RentalsController {
   @ApiOperation({ summary: 'Encerrar aluguel' })
   terminate(@Param('id') id: string) {
     return this.rentalsService.terminate(id);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Excluir aluguel' })
+  remove(@Param('id') id: string) {
+    return this.rentalsService.delete(id);
   }
 }

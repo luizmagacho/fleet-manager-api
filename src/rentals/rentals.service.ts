@@ -346,4 +346,19 @@ export class RentalsService {
       overdueAmount: result[0]?.overdueAmount[0]?.total ?? 0,
     };
   }
+
+  async delete(id: string): Promise<any> {
+    const rental = await this.rentalModel.findById(id);
+    if (!rental) throw new NotFoundException(`Aluguel com ID ${id} não encontrado.`);
+
+    if (rental.status === RentalStatus.ACTIVE) {
+      await this.vehiclesService.updateStatus(
+        rental.vehicleId.toString(),
+        VehicleStatus.AVAILABLE,
+      );
+    }
+
+    await this.rentalModel.findByIdAndDelete(id);
+    return { success: true, message: 'Aluguel excluído com sucesso.' };
+  }
 }
