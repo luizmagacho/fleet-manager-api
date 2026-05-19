@@ -1,19 +1,21 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
-import { User } from '../src/users/user.schema'; // ajuste o caminho se necessário
+import bcrypt from 'bcryptjs';
+import { UserSchema, UserRole } from '../src/auth/schemas/user.schema';
 
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/fleet-manager';
 const ADMIN_EMAIL = 'admin@gestorfrota.com.br';
 const ADMIN_PASSWORD = 'admin123'; // altere se quiser outra senha
 
+const UserModel = mongoose.model('User', UserSchema);
+
 async function resetAdmin() {
   await mongoose.connect(MONGO_URI);
-  await User.deleteOne({ email: ADMIN_EMAIL });
+  await UserModel.deleteOne({ email: ADMIN_EMAIL });
   const hashed = await bcrypt.hash(ADMIN_PASSWORD, 10);
-  await User.create({
+  await UserModel.create({
     email: ADMIN_EMAIL,
     password: hashed,
-    role: 'ADMIN',
+    role: UserRole.ADMIN,
     name: 'Administrador',
   });
   console.log(`✅ Admin recriado → ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
