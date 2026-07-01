@@ -14,11 +14,19 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { FuelType, TransmissionType } from '../schemas/vehicle.schema';
 
 export class CreateVehicleDto {
-  @ApiProperty({ description: 'Placa do veículo', example: 'ABC1D23' })
+  @ApiPropertyOptional({ description: 'Placa do veículo (nomenclatura interna)', example: 'ABC1D23' })
+  @IsOptional()
   @IsString()
   @MinLength(7)
   @MaxLength(8)
-  licensePlate: string;
+  licensePlate?: string;
+
+  @ApiPropertyOptional({ description: 'Placa do veículo (nomenclatura do frontend)', example: 'ABC1D23' })
+  @IsOptional()
+  @IsString()
+  @MinLength(7)
+  @MaxLength(8)
+  plate?: string;
 
   @ApiProperty({ description: 'Marca', example: 'Toyota' })
   @IsString()
@@ -91,6 +99,16 @@ export class CreateVehicleDto {
   @IsOptional()
   @IsNumber()
   purchaseValue?: number;
+
+  @ApiPropertyOptional({ description: 'Valor de compra (nomenclatura do frontend)' })
+  @IsOptional()
+  @IsNumber()
+  purchasePrice?: number;
+
+  @ApiPropertyOptional({ description: 'Quantidade de assentos/lugares', example: 5 })
+  @IsOptional()
+  @IsNumber()
+  seats?: number;
 
   @ApiPropertyOptional({ description: 'Observações' })
   @IsOptional()

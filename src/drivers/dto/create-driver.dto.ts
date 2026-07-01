@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { LicenseCategory } from '../schemas/driver.schema';
+import { LicenseCategory, DriverStatus } from '../schemas/driver.schema';
 
 export class CreateDriverDto {
   @ApiProperty({ description: 'Nome completo do motorista' })
@@ -75,4 +75,9 @@ export class CreateDriverDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({ enum: DriverStatus, description: 'Status do motorista' })
+  @IsOptional()
+  @IsEnum(DriverStatus)
+  status?: DriverStatus;
 }

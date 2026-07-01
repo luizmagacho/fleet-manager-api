@@ -12,8 +12,20 @@ export class VehiclesService {
     private vehicleModel: Model<VehicleDocument>,
   ) {}
 
+  private normalizeVehicleData(dto: any) {
+    const data = { ...dto };
+    if (data.plate && !data.licensePlate) {
+      data.licensePlate = data.plate;
+    }
+    if (data.purchasePrice !== undefined && data.purchaseValue === undefined) {
+      data.purchaseValue = data.purchasePrice;
+    }
+    return data;
+  }
+
   async create(createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
-    const vehicle = new this.vehicleModel(createVehicleDto);
+    const normalized = this.normalizeVehicleData(createVehicleDto);
+    const vehicle = new this.vehicleModel(normalized);
     return vehicle.save();
   }
 
@@ -72,9 +84,10 @@ export class VehiclesService {
   }
 
   async update(id: string, updateData: Partial<CreateVehicleDto>): Promise<Vehicle> {
+    const normalized = this.normalizeVehicleData(updateData);
     const vehicle = await this.vehicleModel.findByIdAndUpdate(
       id,
-      { $set: updateData },
+      { $set: normalized },
       { new: true, runValidators: true },
     );
 
