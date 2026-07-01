@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { AuthService } from './auth/auth.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -43,6 +44,23 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  // Seed Roger user if not exists
+  try {
+    const authService = app.get(AuthService);
+    const existing = await authService.findByEmail('contato@rogercentroautomotivo.com.br');
+    if (!existing) {
+      await authService.createUser(
+        'contato@rogercentroautomotivo.com.br',
+        'Roger@123!',
+        'Roger Centro Automotivo',
+        'ADMIN',
+      );
+      console.log('✅ User contato@rogercentroautomotivo.com.br created successfully on startup.');
+    }
+  } catch (error) {
+    console.error('❌ Failed to seed user on startup:', error.message);
+  }
 
   const port = process.env.PORT ?? 3001;
   await app.listen(port);
