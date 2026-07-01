@@ -7,13 +7,13 @@ import { DriverStatus } from '../schemas/driver.schema';
 export class UpdateDriverDto extends PartialType(CreateDriverDto) {
   @ApiPropertyOptional({ description: 'Status do motorista', enum: DriverStatus })
   @IsOptional()
-  @IsEnum(DriverStatus)
+  @IsEnum(DriverStatus, { message: 'O status do motorista selecionado é inválido.' })
   status?: DriverStatus;
 
   @ApiPropertyOptional({ description: 'Avaliação (0-5)' })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(5)
+  @IsNumber({}, { message: 'A avaliação deve ser um número.' })
+  @Min(0, { message: 'A avaliação mínima é 0.' })
+  @Max(5, { message: 'A avaliação máxima é 5.' })
   rating?: number;
 }
