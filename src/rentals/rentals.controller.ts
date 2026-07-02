@@ -99,6 +99,15 @@ export class RentalsController {
     return this.rentalsService.recordPayment(id, recordPaymentDto);
   }
 
+  @Post(':id/mileage')
+  @ApiOperation({ summary: 'Registrar quilometragem mensal' })
+  recordMileage(
+    @Param('id') id: string,
+    @Body() mileageDto: { newMileage: number; date?: string },
+  ) {
+    return this.rentalsService.recordMileage(id, mileageDto);
+  }
+
   @Put(':id/terminate')
   @ApiOperation({ summary: 'Encerrar aluguel' })
   terminate(@Param('id') id: string) {

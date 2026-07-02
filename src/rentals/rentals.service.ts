@@ -194,6 +194,39 @@ export class RentalsService {
     return rental;
   }
 
+  async recordMileage(rentalId: string, mileageDto: { newMileage: number, date?: string }): Promise<Rental> {
+    const rental = await this.rentalModel.findById(rentalId).populate('vehicleId');
+    if (!rental) throw new NotFoundException(`Aluguel com ID ${rentalId} não encontrado.`);
+
+    const vehicle = rental.vehicleId as any;
+    
+    const previousMileage = rental.mileageLogs && rental.mileageLogs.length > 0 
+      ? rental.mileageLogs[rental.mileageLogs.length - 1].newMileage 
+      : vehicle.mileage || vehicle.currentMileage || 0;
+
+    const kmDriven = mileageDto.newMileage - previousMileage;
+
+    if (kmDriven < 0) {
+      throw new BadRequestException('A nova quilometragem não pode ser menor que a anterior.');
+    }
+
+    const newLog = {
+      date: mileageDto.date ? new Date(mileageDto.date) : new Date(),
+      previousMileage,
+      newMileage: mileageDto.newMileage,
+      kmDriven,
+    };
+
+    rental.mileageLogs.push(newLog as any);
+    await rental.save();
+
+    await this.vehiclesService.update(vehicle._id.toString(), {
+      mileage: mileageDto.newMileage,
+    } as any);
+
+    return rental;
+  }
+
   async terminate(id: string): Promise<Rental> {
     const rental = await this.rentalModel.findById(id);
     if (!rental) throw new NotFoundException(`Aluguel com ID ${id} não encontrado.`);

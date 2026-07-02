@@ -47,6 +47,21 @@ export class Payment {
   notes: string;
 }
 
+@Schema({ _id: true })
+export class MileageLog {
+  @Prop({ required: true })
+  date: Date;
+
+  @Prop({ required: true })
+  previousMileage: number;
+
+  @Prop({ required: true })
+  newMileage: number;
+
+  @Prop({ required: true })
+  kmDriven: number;
+}
+
 @Schema({ timestamps: true, collection: 'rentals' })
 export class Rental {
   @Prop({ type: Types.ObjectId, ref: 'Vehicle', required: true })
@@ -75,6 +90,9 @@ export class Rental {
 
   @Prop({ type: [Payment], default: [] })
   payments: Payment[];
+
+  @Prop({ type: [MileageLog], default: [] })
+  mileageLogs: MileageLog[];
 
   @Prop({ type: Number, default: 0 })
   securityDeposit: number;
