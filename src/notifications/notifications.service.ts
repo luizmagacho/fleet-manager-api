@@ -107,6 +107,59 @@ export class NotificationsService {
     this.logger.log(`Pagamentos verificados: ${overdueRentals.length} aluguéis com atraso.`);
   }
 
+  /** Runs every day at 8:15am — check payments due in 2 days */
+  @Cron('15 8 * * *')
+  async checkUpcomingPayments(): Promise<void> {
+    this.logger.log('Verificando pagamentos próximos ao vencimento...');
+
+    const upcomingRentals = await this.rentalsService.findUpcomingPayments(2);
+
+    for (const rental of upcomingRentals) {
+      const rentalDoc = rental as any;
+      const driver = rentalDoc.driverId;
+      const vehicle = rentalDoc.vehicleId;
+
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + 2);
+      const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0)).getTime();
+      const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999)).getTime();
+
+      const upcomingPayments = rentalDoc.payments.filter(
+        (p: any) => p.status === 'PENDING' && new Date(p.dueDate).getTime() >= startOfDay && new Date(p.dueDate).getTime() <= endOfDay,
+      );
+
+      for (const payment of upcomingPayments) {
+        await Promise.allSettled([
+          this.emailService.sendPaymentUpcomingWarning(driver.name, driver.email, vehicle.licensePlate, payment.amount, payment.dueDate),
+          this.whatsAppService.sendPaymentUpcomingWarning(driver.name, driver.phone, vehicle.licensePlate, payment.amount, payment.dueDate),
+        ]);
+      }
+    }
+
+    this.logger.log(`Pagamentos próximos verificados: ${upcomingRentals.length} alertas enviados.`);
+  }
+
+  /** Runs every day at 10:00am — check monthly mileage updates */
+  @Cron('0 10 * * *')
+  async checkMonthlyMileage(): Promise<void> {
+    this.logger.log('Verificando fechamento de ciclo de quilometragem mensal...');
+
+    const monthlyRentals = await this.rentalsService.findRentalsForMonthlyMileage();
+
+    for (const rental of monthlyRentals) {
+      const rentalDoc = rental as any;
+      const driver = rentalDoc.driverId;
+      const vehicle = rentalDoc.vehicleId;
+
+      await Promise.allSettled([
+        this.emailService.sendMileageUpdateReminder(driver.name, driver.email, vehicle.licensePlate),
+        this.whatsAppService.sendMileageUpdateReminder(driver.name, driver.phone, vehicle.licensePlate),
+      ]);
+    }
+
+    this.logger.log(`Ciclos mensais verificados: ${monthlyRentals.length} alertas enviados.`);
+  }
+
   /** Manual trigger — send test notification */
   async sendTestNotification(email: string, phone?: string): Promise<void> {
     await this.emailService.send({

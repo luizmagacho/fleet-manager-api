@@ -82,4 +82,18 @@ export class WhatsAppService {
       message: `🚨 *GestorFrota PR* — Nova multa detectada no veículo *${plate}*!\n\n*Infração:* ${description}\n*Valor:* R$ ${amount.toFixed(2)}\n\nVerifique no aplicativo para mais detalhes.`,
     });
   }
+
+  async sendPaymentUpcomingWarning(driverName: string, phone: string, plate: string, amount: number, dueDate: Date): Promise<void> {
+    await this.send({
+      to: phone,
+      message: `⏳ *GestorFrota PR* — Olá, ${driverName}!\n\nLembrete amigável: sua parcela de *R$ ${amount.toFixed(2)}* do veículo *${plate}* vence em *${new Date(dueDate).toLocaleDateString('pt-BR')}*.\n\nEvite atrasos! 🚗`,
+    });
+  }
+
+  async sendMileageUpdateReminder(driverName: string, phone: string, plate: string): Promise<void> {
+    await this.send({
+      to: phone,
+      message: `🚗 *GestorFrota PR* — Olá, ${driverName}!\n\nSeu contrato do veículo *${plate}* fechou mais um ciclo de 30 dias!\n\nPor favor, informe a *quilometragem atual* do painel do carro para atualizarmos o sistema. ✅`,
+    });
+  }
 }

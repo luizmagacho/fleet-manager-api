@@ -107,4 +107,43 @@ export class EmailService {
       `,
     });
   }
+
+  async sendPaymentUpcomingWarning(driverName: string, driverEmail: string, plate: string, amount: number, dueDate: Date): Promise<void> {
+    await this.send({
+      to: driverEmail,
+      subject: `⏳ Lembrete de Vencimento - Veículo ${plate}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #2563EB; padding: 20px; border-radius: 8px 8px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 22px;">GestorFrota PR</h1>
+          </div>
+          <div style="background: #f9f9f9; padding: 24px; border-radius: 0 0 8px 8px;">
+            <p>Olá, <strong>${driverName}</strong>!</p>
+            <p>Este é um lembrete amigável de que a sua próxima parcela de aluguel do veículo <strong>${plate}</strong> no valor de <strong>R$ ${amount.toFixed(2)}</strong> vence em breve.</p>
+            <p>Data de Vencimento: <strong>${new Date(dueDate).toLocaleDateString('pt-BR')}</strong></p>
+            <p>Por favor, realize o pagamento no prazo para evitar cobranças adicionais.</p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  async sendMileageUpdateReminder(driverName: string, driverEmail: string, plate: string): Promise<void> {
+    await this.send({
+      to: driverEmail,
+      subject: `🚗 Atualização Mensal de Quilometragem - Veículo ${plate}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #10B981; padding: 20px; border-radius: 8px 8px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 22px;">GestorFrota PR</h1>
+          </div>
+          <div style="background: #f9f9f9; padding: 24px; border-radius: 0 0 8px 8px;">
+            <p>Olá, <strong>${driverName}</strong>!</p>
+            <p>O seu contrato de locação do veículo <strong>${plate}</strong> completou mais um ciclo de 30 dias!</p>
+            <p>Por favor, informe a quilometragem atual do veículo para mantermos o histórico em dia.</p>
+          </div>
+        </div>
+      `,
+    });
+  }
 }

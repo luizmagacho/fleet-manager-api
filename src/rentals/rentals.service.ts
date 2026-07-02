@@ -380,6 +380,55 @@ export class RentalsService {
     };
   }
 
+  async findUpcomingPayments(daysAhead: number): Promise<Rental[]> {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + daysAhead);
+    
+    const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+
+    return this.rentalModel
+      .find({
+        status: RentalStatus.ACTIVE,
+        payments: {
+          $elemMatch: {
+            status: PaymentStatus.PENDING,
+            dueDate: { $gte: startOfDay, $lte: endOfDay },
+          },
+        },
+      })
+      .populate('vehicleId', 'licensePlate brand model')
+      .populate('driverId', 'name phone email');
+  }
+
+  async findRentalsForMonthlyMileage(): Promise<Rental[]> {
+    const now = new Date();
+    const currentDay = now.getDate();
+    
+    const activeRentals = await this.rentalModel
+      .find({ status: RentalStatus.ACTIVE })
+      .populate('vehicleId', 'licensePlate brand model')
+      .populate('driverId', 'name phone email');
+
+    return activeRentals.filter((rental) => {
+      if (!rental.startDate) return false;
+      const startDate = new Date(rental.startDate);
+      
+      const isSameMonthAndYear = now.getMonth() === startDate.getMonth() && now.getFullYear() === startDate.getFullYear();
+      if (isSameMonthAndYear) return false;
+      
+      const startDay = startDate.getDate();
+      if (currentDay === startDay) return true;
+      
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      if (currentDay === lastDayOfMonth && startDay > lastDayOfMonth) {
+        return true;
+      }
+      
+      return false;
+    });
+  }
+
   async delete(id: string): Promise<any> {
     const rental = await this.rentalModel.findById(id);
     if (!rental) throw new NotFoundException(`Aluguel com ID ${id} não encontrado.`);
