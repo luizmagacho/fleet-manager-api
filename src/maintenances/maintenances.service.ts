@@ -6,18 +6,57 @@ import { VehiclesService } from '../vehicles/vehicles.service';
 import { HistoryService } from '../history/history.service';
 import { EventType } from '../history/schemas/history-event.schema';
 
+import { IsString, IsNumber, IsOptional, IsDate, IsMongoId, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+
 export class CreateMaintenanceDto {
+  @IsMongoId()
   vehicleId: string;
+
+  @IsString()
   type: string;
+
+  @Type(() => Date)
+  @IsDate()
   scheduledDate: Date;
+
+  @IsString()
   description: string;
+
+  @IsOptional()
+  @IsString()
   workshopName?: string;
+
+  @IsOptional()
+  @IsString()
   workshopPhone?: string;
+
+  @IsOptional()
+  @IsString({ each: true })
   services?: string[];
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   cost?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   mileageAtService?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   nextServiceMileage?: number;
+
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
   nextServiceDate?: Date;
+
+  @IsOptional()
+  @IsString()
   notes?: string;
 }
 
