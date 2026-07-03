@@ -15,6 +15,7 @@ import { DetranModule } from './detran/detran.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { HistoryModule } from './history/history.module';
 import { ReportsModule } from './reports/reports.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ReportsModule } from './reports/reports.module';
     NotificationsModule,
     HistoryModule,
     ReportsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
